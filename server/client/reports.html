@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanyakla Debts - Reports & Analytics</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>Kanyakla Debts Reports</h1>
+                <p>Financial overview, metrics, and collection performance.</p>
+            </div>
+            <nav style="margin-top: 0.5rem;">
+                <a href="dashboard.html" class="btn-secondary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">← Back to Dashboard</a>
+            </nav>
+        </header>
+
+        <!-- Summary Cards -->
+        <div class="metrics-grid" style="margin-top: 2rem;">
+            <div class="card">
+                <h3>Total Portfolio Value</h3>
+                <p id="reportTotalPortfolio" class="metric-value">KSh 0</p>
+            </div>
+            <div class="card">
+                <h3>Total Collected</h3>
+                <p id="reportTotalCollected" class="metric-value" style="color: #22c55e;">KSh 0</p>
+            </div>
+            <div class="card">
+                <h3>Outstanding Debt</h3>
+                <p id="reportTotalOutstanding" class="metric-value" style="color: #ef4444;">KSh 0</p>
+            </div>
+        </div>
+
+        <!-- Detailed Breakdown Table -->
+        <div class="main-content" style="margin-top: 2rem;">
+            <div class="table-card">
+                <h2>All Debtors Summary</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Original Debt</th>
+                            <th>Current Balance</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <!-- Populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/debtors');
+                const debtors = await response.json();
+                
+                const tbody = document.getElementById('reportTableBody');
+                const totalPortfolioEl = document.getElementById('reportTotalPortfolio');
+                const totalCollectedEl = document.getElementById('reportTotalCollected');
+                const totalOutstandingEl = document.getElementById('reportTotalOutstanding');
+
+                tbody.innerHTML = '';
+
+                if (!debtors || debtors.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b;">No records found.</td></tr>`;
+                    return;
+                }
+
+                let portfolio = 0;
+                let collected = 0;
+                let outstanding = 0;
+                const today = new Date().toISOString().split('T')[0];
+
+                debtors.forEach(d => {
+                    const original = Number(d.total);
+                    const balance = Number(d.balance);
+                    const paid = original - balance;
+
+                    portfolio += original;
+                    collected += paid;
+                    outstanding += balance;
+
+                    const isCleared = balance <= 0;
+                    const isOverdue = !isCleared && d.dueDate < today;
+
+                    let statusText = 'Active';
+                    let statusColor = '#ef4444';
+
+                    if (isCleared) {
+                        statusText = 'Cleared ✓';
+                        statusColor = '#22c55e';
+                    } else if (isOverdue) {
+                        statusText = '⚠️ Overdue';
+                        statusColor = '#f97316';
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${d.name}</strong></td>
+                        <td>${d.phone}</td>
+                        <td>KSh ${original.toLocaleString()}</td>
+                        <td>KSh ${balance.toLocaleString()}</td>
+                        <td><span style="color: ${statusColor}; font-weight: bold;">${statusText}</span></td>
+                        <td>${d.dueDate}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                if (totalPortfolioEl) totalPortfolioEl.innerText = `KSh ${portfolio.toLocaleString()}`;
+                if (totalCollectedEl) totalCollectedEl.innerText = `KSh ${collected.toLocaleString()}`;
+                if (totalOutstandingEl) totalOutstandingEl.innerText = `KSh ${outstanding.toLocaleString()}`;
+
+            } catch (error) {
+                console.error('Error loading reports data:', error);
+            }
+        });
+    </script>
+</body>
+</html>

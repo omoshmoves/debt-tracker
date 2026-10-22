@@ -1,0 +1,126 @@
+<nav style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+    <a href="reports.html" class="btn-secondary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem; background: #334155; color: white;">📊 View Reports</a>
+    <a href="index.html" class="btn-secondary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">← Back to Home</a>
+</nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanyakla Agency Debts - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>Kanyakla Agency Debts</h1>
+                <p>Manage debtors, search records, and process payments.</p>
+            </div>
+            <nav style="margin-top: 0.5rem;">
+                <a href="index.html" class="btn-secondary" style="text-decoration: none; padding: 0.5rem 1rem; font-size: 0.9rem;">← Back to Home</a>
+            </nav>
+        </header>
+
+        <!-- Summary Cards -->
+        <div class="metrics-grid">
+            <div class="card">
+                <h3>Total Outstanding Debt</h3>
+                <p id="totalDebt" class="metric-value">KSh 0</p>
+            </div>
+            <div class="card">
+                <h3>Total Collected</h3>
+                <p id="totalCollected" class="metric-value" style="color: #22c55e;">KSh 0</p>
+            </div>
+            <div class="card">
+                <h3>Active Debtors</h3>
+                <p id="activeDebtorsCount" class="metric-value">0</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Add Debtor Section -->
+            <div class="form-card">
+                <h2>Add New Debtor</h2>
+                <form id="addDebtorForm">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" required placeholder="Enter debtor name">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" id="phone" required placeholder="07XXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label for="total">Total Debt (KSh)</label>
+                        <input type="number" id="total" required min="1" placeholder="Enter amount">
+                    </div>
+                    <div class="form-group">
+                        <label for="dueDate">Due Date</label>
+                        <input type="date" id="dueDate" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Add Debtor</button>
+                </form>
+            </div>
+
+            <!-- Debtors List Section with Search -->
+            <div class="table-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                    <h2>Debtors List</h2>
+                    <input type="text" id="searchInput" placeholder="Search by name or phone..." onkeyup="filterDebtors()" style="padding: 0.5rem; width: 250px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px;">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Total Debt</th>
+                            <th>Balance</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="debtorsTableBody">
+                        <!-- Populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Log Payment -->
+    <div class="modal-overlay" id="payModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Record Payment</h3>
+            </div>
+            <form id="payForm" onsubmit="handleLogPayment(event)">
+                <input type="hidden" id="payDebtorId">
+                <div class="form-group">
+                    <label>Debtor Name</label>
+                    <input type="text" id="payDebtorName" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number (M-Pesa)</label>
+                    <input type="text" id="payDebtorPhone">
+                </div>
+                <div class="form-group">
+                    <label>Remaining Balance</label>
+                    <input type="text" id="payCurrentBalance" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Payment Amount (KSh)</label>
+                    <input type="number" id="paymentAmount" required min="1" placeholder="Enter amount received">
+                </div>
+                <div class="modal-footer" style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center; margin-top: 1rem;">
+                    <button type="button" class="btn-secondary" onclick="closePayModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" style="background-color: #2563eb;">Record Cash 💵</button>
+                    <button type="button" class="btn-primary" style="background-color: #22c55e;" onclick="handleMpesaPayment()">Pay via M-Pesa 📱</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
